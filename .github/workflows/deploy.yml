@@ -1,0 +1,81 @@
+name: Deploy to GCP Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: us-central1
+  ARTIFACT_REGISTRY: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/verdant-ai
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # for Workload Identity Federation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      # --- Backend ---
+      - name: Build & push API image
+        working-directory: apps/api
+        run: |
+          docker build -t ${{ env.ARTIFACT_REGISTRY }}/api:${{ github.sha }} .
+          docker push ${{ env.ARTIFACT_REGISTRY }}/api:${{ github.sha }}
+
+      - name: Deploy API to Cloud Run
+        run: |
+          gcloud run deploy verdant-api \
+            --image ${{ env.ARTIFACT_REGISTRY }}/api:${{ github.sha }} \
+            --region ${{ env.GCP_REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --min-instances 1 \
+            --set-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest,JWT_SECRET=JWT_SECRET:latest,DATABASE_URL=DATABASE_URL:latest" \
+            --set-env-vars "ENVIRONMENT=production"
+
+      # --- Frontend ---
+      - name: Get API URL
+        id: api-url
+        run: |
+          URL=$(gcloud run services describe verdant-api --region ${{ env.GCP_REGION }} --format='value(status.url)')
+          echo "api_url=${URL}/api/v1" >> $GITHUB_OUTPUT
+
+      - name: Build & push web image
+        working-directory: apps/web
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ steps.api-url.outputs.api_url }} \
+            -t ${{ env.ARTIFACT_REGISTRY }}/web:${{ github.sha }} .
+          docker push ${{ env.ARTIFACT_REGISTRY }}/web:${{ github.sha }}
+
+      - name: Deploy web to Cloud Run
+        run: |
+          gcloud run deploy verdant-web \
+            --image ${{ env.ARTIFACT_REGISTRY }}/web:${{ github.sha }} \
+            --region ${{ env.GCP_REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --min-instances 1
+
+      - name: Print URLs
+        run: |
+          echo "API: $(gcloud run services describe verdant-api --region ${{ env.GCP_REGION }} --format='value(status.url)')"
+          echo "Web: $(gcloud run services describe verdant-web --region ${{ env.GCP_REGION }} --format='value(status.url)')"
