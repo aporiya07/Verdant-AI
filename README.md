@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# Verdant-AI: Carbon Footprint Awareness Platform 🌱
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Challenge 3:** Design a solution that helps individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
 
-Currently, two official plugins are available:
+Verdant-AI is a comprehensive platform designed to turn climate anxiety into actionable, gamified progress. It helps users **understand** their baseline, **track** daily emissions with natural language logging, and **reduce** their impact through AI-driven coaching and personalized weekly quests.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🌟 Key Features
 
-## React Compiler
+* **End-to-End Individual Footprint Flow:** A seamless 5-step onboarding process establishes a baseline, leading into a dashboard that ties every interaction to the "understand, track, reduce" loop.
+* **EcoCoach (Sage):** An intelligent, context-aware AI assistant powered by Google Gemini. Sage analyzes your logs, injects category data, and dynamically updates recommendations whenever a new activity is logged.
+* **EarthTwin 3D Visualization:** A dynamic, WebGL-powered 3D globe that acts as a visual representation of your "GreenScore", visually thriving or degrading based on your monthly carbon footprint versus regional benchmarks.
+* **Gamification & Weekly Quests:** Users build streaks, earn XP, and complete AI-generated weekly quests tailored to their highest emission categories.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🏗️ Architecture & Code Quality
 
-## Expanding the ESLint configuration
+Our architecture is designed for maintainability, security, and scalability:
+* **Consistent Structure:** Clear separation of concerns with a distinct service/router split for backend APIs.
+* **Type Safety & Linting:** Strictly typed schemas, enforced by ESLint on the frontend and Ruff on the backend.
+* **Security First:** Implements bcrypt for password hashing, `httpOnly` cookies for JWTs, input validation, strict CORS policies, and secrets management via GCP Secret Manager.
+* **Efficiency:** Lean Docker images, database indexing for rapid query performance, cached `ImpactLens` insights to reduce API overhead, and a robust Gemini 2.5 Flash implementation (with a fallback to Flash-Lite to guarantee uptime).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+The platform features a demo account flow so you can test the entire experience in under 5 minutes without needing complex setup.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+* Node.js 20+
+* Python 3.11+ (for API services)
+* Docker (for containerized deployment)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Local Development
+1. **Clone & Install:**
+   ```bash
+   npm install
+   ```
+2. **Environment Setup:**
+   Copy `.env.example` to `.env` and add your Google Gemini API key.
+3. **Run Dev Server:**
+   ```bash
+   npm run dev
+   ```
+4. **Access the App:** Open `http://localhost:5173` in your browser.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## ♿ Accessibility
+Verdant-AI is built with inclusivity in mind:
+* Semantic HTML forms and clear focus states.
+* High color contrast ratios (with a tailored dark theme).
+* Text alternatives for all chart data and visualizations.
