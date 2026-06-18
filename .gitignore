@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Environment (NEVER commit this)
+.env
+.env.local
+.env.production
+
+# Firebase
+.firebase/
+
+# Misc
+*.local
+.DS_Store
+Thumbs.db
