@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   Car, UtensilsCrossed, Zap, ShoppingBag, Plane, Recycle,
   Train, Bus, CircleDot, Bike, TrainFront, Footprints,

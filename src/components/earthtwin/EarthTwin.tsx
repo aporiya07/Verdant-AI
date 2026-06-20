@@ -74,6 +74,7 @@ export function EarthTwin({ size = 280, className = '', static: isStatic = false
       cancelAnimationFrame(rafRef.current)
       globeRef.current?.destroy()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, healthScore, isStatic])
 
   const zone = monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg

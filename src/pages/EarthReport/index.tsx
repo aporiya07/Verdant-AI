@@ -66,10 +66,12 @@ Activities: ${monthLogs.length}
     } finally {
       setSummaryLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.name, user.city, monthlyKg, user.monthlyGoalKg, categoryTotals, monthLogs.length, saveReport, monthKey])
 
   useEffect(() => {
     if (savedReport?.geminiSummary) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSummary(savedReport.geminiSummary)
     } else if (monthlyKg > 0) {
       generateSummary()

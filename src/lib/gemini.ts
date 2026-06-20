@@ -65,7 +65,7 @@ export async function callGemini(prompt: string, systemPrompt?: string): Promise
       return result
     } catch (e2) {
       console.error('Both Gemini models failed:', e2)
-      throw new Error('Gemini unavailable')
+      throw new Error('Gemini unavailable', { cause: e2 })
     }
   }
 }

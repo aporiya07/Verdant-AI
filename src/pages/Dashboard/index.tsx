@@ -1,4 +1,5 @@
 import { m } from 'motion/react'
+import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Plus, Car, UtensilsCrossed, Zap, Plane, ShoppingBag, X, ChevronRight } from 'lucide-react'
 import { useVerdantStore, getMonthlyTotal, getCategoryTotals } from '../../lib/store'
@@ -136,6 +137,7 @@ export function DashboardPage() {
   useEffect(() => {
     const shouldRefresh = !clarityCache || clarityCache.logCount !== logs.length
     if (shouldRefresh && !insightsLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInsightsLoading(true)
       getClarityInsights({
         name: user.name,
@@ -160,6 +162,7 @@ export function DashboardPage() {
     } else if (clarityCache) {
       setInsights(clarityCache.insights)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logs.length])
 
   const offsetCostINR = monthlyKg * 0.45 * 420  // ~₹420/tonne, 0.45 for rough fraction
@@ -281,8 +284,13 @@ export function DashboardPage() {
               )
             })}
           </div>
-          <div className="mt-4 pt-3 border-t border-[rgba(46,204,122,0.1)] text-xs text-[rgba(245,240,232,0.5)]">
-            To offset your monthly footprint: <span className="text-[#FFD166] font-semibold">{formatINR(Math.round(offsetCostINR))}</span>
+          <div className="mt-4 pt-3 border-t border-[rgba(46,204,122,0.1)] flex items-center justify-between">
+            <p className="text-xs text-[rgba(245,240,232,0.5)]">
+              To offset your footprint: <span className="text-[#FFD166] font-semibold">{formatINR(Math.round(offsetCostINR))}</span>
+            </p>
+            <Link to="/market" className="text-xs font-semibold text-[#2ECC7A] hover:text-[#A8F5B0] transition-colors bg-[rgba(46,204,122,0.1)] px-3 py-1 rounded-full">
+              Offset Now
+            </Link>
           </div>
         </GlassCard>
       </m.div>
