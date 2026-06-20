@@ -1,8 +1,18 @@
 # Verdant-AI: Carbon Footprint Awareness Platform 🌱
 
+**Live Demo:** [https://verdant-ai-web-pbjag56qea-uc.a.run.app](https://verdant-ai-web-pbjag56qea-uc.a.run.app)
+
 **Challenge 3:** Design a solution that helps individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights.
 
 Verdant-AI is a comprehensive platform designed to turn climate anxiety into actionable, gamified progress. It helps users **understand** their baseline, **track** daily emissions with natural language logging, and **reduce** their impact through AI-driven coaching and personalized weekly quests.
+
+## 📸 Screenshots
+
+![Initial Screen](images/initial-screen.png)
+*Initial onboarding and setup screen.*
+
+![Main Dashboard](images/main-dashboard.png)
+*Main dashboard showing carbon footprint tracking, Sage AI coach, and EarthReport.*
 
 ## 🌟 Key Features
 
