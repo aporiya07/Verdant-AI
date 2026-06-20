@@ -9,14 +9,15 @@ import { GlassCard } from '../../components/ui/GlassCard'
 import { CategoryBadge } from '../../components/ui/Badge'
 import { WeeklyBarChart } from '../../components/charts/WeeklyBarChart'
 import type { ActivityCategory } from '../../lib/store'
+import { CategoryIcon } from '../../components/ui/CategoryIcon'
 
-const CATEGORIES: { id: ActivityCategory; label: string; emoji: string }[] = [
-  { id: 'transport', label: 'Transport', emoji: '🚗' },
-  { id: 'food', label: 'Food', emoji: '🍛' },
-  { id: 'energy', label: 'Energy', emoji: '⚡' },
-  { id: 'shopping', label: 'Shopping', emoji: '🛍️' },
-  { id: 'travel', label: 'Travel', emoji: '✈️' },
-  { id: 'waste', label: 'Waste', emoji: '♻️' },
+const CATEGORIES: { id: ActivityCategory; label: string; icon: string }[] = [
+  { id: 'transport', label: 'Transport', icon: 'Car' },
+  { id: 'food', label: 'Food', icon: 'UtensilsCrossed' },
+  { id: 'energy', label: 'Energy', icon: 'Zap' },
+  { id: 'shopping', label: 'Shopping', icon: 'ShoppingBag' },
+  { id: 'travel', label: 'Travel', icon: 'Plane' },
+  { id: 'waste', label: 'Waste', icon: 'Recycle' },
 ]
 
 function AddLogModal({ onClose }: { onClose: () => void }) {
@@ -121,7 +122,7 @@ function AddLogModal({ onClose }: { onClose: () => void }) {
                   color: category === c.id ? CATEGORY_COLORS[c.id] : 'rgba(245,240,232,0.6)',
                 }}
               >
-                <span>{c.emoji}</span> {c.label}
+                <CategoryIcon name={c.icon} size={14} strokeWidth={1.75} /> {c.label}
               </button>
             ))}
           </div>
@@ -165,7 +166,7 @@ function AddLogModal({ onClose }: { onClose: () => void }) {
                     color: selectedTemplate === t.id ? '#A8F5B0' : 'rgba(245,240,232,0.7)',
                   }}
                 >
-                  <span>{t.icon}</span>
+                  <CategoryIcon name={t.icon} size={16} strokeWidth={1.75} />
                   <span className="flex-1">{t.label}</span>
                   {t.defaultCO2 > 0 && <span className="text-xs opacity-50">{t.defaultCO2}kg</span>}
                 </button>
@@ -277,7 +278,7 @@ export function TraceLogPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F5F0E8]">TraceLog 📊</h1>
+          <h1 className="text-2xl font-bold text-[#F5F0E8]">TraceLog</h1>
           <p className="text-sm text-[rgba(245,240,232,0.5)]">Track every emission, big or small</p>
         </div>
         <m.button
@@ -315,7 +316,7 @@ export function TraceLogPage() {
               border: `1px solid ${filterCat === c.id ? CATEGORY_COLORS[c.id] + '44' : 'transparent'}`,
             }}
           >
-            {c.emoji} {c.label}
+            <CategoryIcon name={c.icon} size={12} className="inline mr-1" />{c.label}
           </button>
         ))}
       </div>
@@ -331,7 +332,7 @@ export function TraceLogPage() {
       {/* Log timeline */}
       {Object.keys(grouped).length === 0 ? (
         <GlassCard className="p-8 text-center">
-          <p className="text-4xl mb-3">🌱</p>
+          <CategoryIcon name="Sprout" size={48} className="mb-3" />
           <p className="text-[#F5F0E8] font-semibold mb-1">No activities logged yet</p>
           <p className="text-sm text-[rgba(245,240,232,0.5)]">
             Start logging to track your carbon footprint!
@@ -366,7 +367,7 @@ export function TraceLogPage() {
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0"
                           style={{ background: `${CATEGORY_COLORS[log.category]}22` }}
                         >
-                          {CATEGORIES.find(c => c.id === log.category)?.emoji ?? '📌'}
+                          <CategoryIcon name={CATEGORIES.find(c => c.id === log.category)?.icon ?? 'Leaf'} size={16} strokeWidth={1.75} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-[#F5F0E8] truncate">{log.activity}</p>

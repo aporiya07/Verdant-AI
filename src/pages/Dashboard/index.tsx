@@ -10,13 +10,14 @@ import { GlassCard } from '../../components/ui/GlassCard'
 import { SkeletonCard } from '../../components/ui/SkeletonCard'
 import { formatINR, formatNumDecimal } from '../../lib/formatters'
 import { EmissionsAreaChart } from '../../components/charts/EmissionsAreaChart'
+import { CategoryIcon } from '../../components/ui/CategoryIcon'
 
 const QUICK_ADD_CATEGORIES = [
-  { icon: Car, label: 'Drive', emoji: '🚗', category: 'transport' },
-  { icon: UtensilsCrossed, label: 'Meal', emoji: '🍛', category: 'food' },
-  { icon: Zap, label: 'Energy', emoji: '⚡', category: 'energy' },
-  { icon: Plane, label: 'Travel', emoji: '✈️', category: 'travel' },
-  { icon: ShoppingBag, label: 'Shop', emoji: '🛍️', category: 'shopping' },
+  { icon: Car, label: 'Drive', category: 'transport' },
+  { icon: UtensilsCrossed, label: 'Meal', category: 'food' },
+  { icon: Zap, label: 'Energy', category: 'energy' },
+  { icon: Plane, label: 'Travel', category: 'travel' },
+  { icon: ShoppingBag, label: 'Shop', category: 'shopping' },
 ]
 
 function QuickAddModal({ category, onClose }: { category: string; onClose: () => void }) {
@@ -75,7 +76,7 @@ function QuickAddModal({ category, onClose }: { category: string; onClose: () =>
                 color: selected?.id === t.id ? '#A8F5B0' : 'rgba(245,240,232,0.7)',
               }}
             >
-              <span className="text-base">{t.icon}</span>
+              <span className="text-base"><CategoryIcon name={t.icon} size={16} /></span>
               <span className="flex-1 font-medium">{t.label}</span>
               {t.defaultCO2 > 0 && (
                 <span className="text-xs text-[rgba(245,240,232,0.4)]">{t.defaultCO2} kg</span>
@@ -213,7 +214,7 @@ export function DashboardPage() {
               whileHover={{ scale: 1.03, background: 'rgba(46,204,122,0.2)' }}
               whileTap={{ scale: 0.97 }}
             >
-              <span>{cat.emoji}</span>
+              <cat.icon size={14} strokeWidth={1.75} />
               <span>{cat.label}</span>
               <Plus size={14} className="opacity-60" />
             </m.button>
@@ -225,7 +226,7 @@ export function DashboardPage() {
       <m.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs text-[rgba(245,240,232,0.5)] uppercase tracking-wider font-medium">
-            🤖 Sage's Clarity Feed
+            <CategoryIcon name="Bot" size={12} className="inline mr-1" />Sage's Clarity Feed
           </p>
           <span className="text-xs text-[rgba(168,245,176,0.4)]">AI-powered</span>
         </div>

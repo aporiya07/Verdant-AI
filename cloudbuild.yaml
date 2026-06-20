@@ -1,0 +1,55 @@
+# Build with Gemini API key from Secret Manager, then deploy to Cloud Run.
+# Run: gcloud builds submit --config cloudbuild.yaml
+# Or use: npm run deploy:cloudrun
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: Build
+    entrypoint: 'bash'
+    secretEnv:
+      - VITE_GEMINI_API_KEY
+    args:
+      - '-c'
+      - |
+        docker build --build-arg VITE_GEMINI_API_KEY="$$VITE_GEMINI_API_KEY" -t ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${BUILD_ID} .
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push
+    args:
+      - push
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${BUILD_ID}
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --image
+      - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${BUILD_ID}
+      - --region
+      - ${_DEPLOY_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --port
+      - "8080"
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/${PROJECT_ID}/secrets/${_SECRET_NAME}/versions/latest
+      env: VITE_GEMINI_API_KEY
+
+substitutions:
+  _SERVICE_NAME: verdant-ai-web
+  _DEPLOY_REGION: us-central1
+  _AR_HOSTNAME: us-central1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _SECRET_NAME: gemini-api-key
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+images:
+  - ${_AR_HOSTNAME}/${PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:${BUILD_ID}

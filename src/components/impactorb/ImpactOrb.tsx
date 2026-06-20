@@ -1,5 +1,6 @@
 import { m, useMotionValue, useSpring, useReducedMotion } from 'motion/react'
 import { useEffect } from 'react'
+import { Leaf, Zap, CircleAlert } from 'lucide-react'
 import { getOrbZone, getOrbMessage, INDIA_BENCHMARKS } from '../../lib/carbon'
 import { formatNumDecimal } from '../../lib/formatters'
 
@@ -111,14 +112,14 @@ export function ImpactOrb({ monthlyKg, goalKg = INDIA_BENCHMARKS.avgMonthlyKg, s
           </m.p>
           <p className="text-xs text-[rgba(245,240,232,0.6)] mt-1">kg CO₂/month</p>
           <div
-            className="mt-2 text-xs font-semibold px-2 py-0.5 rounded-full"
+            className="mt-2 text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1"
             style={{
               background: `${colors.glow}`,
               color: colors.text,
               border: `1px solid ${colors.stroke}40`,
             }}
           >
-            {zone === 'green' ? '🌿' : zone === 'amber' ? '⚡' : '🔴'}
+            {zone === 'green' ? <Leaf size={10} /> : zone === 'amber' ? <Zap size={10} /> : <CircleAlert size={10} />}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
-const PRIMARY_MODEL = 'gemini-2.5-flash'
-const FALLBACK_MODEL = 'gemini-2.0-flash-lite'
+const PRIMARY_MODEL = 'gemini-3.5-flash'
+const FALLBACK_MODEL = 'gemini-3.1-flash-lite'
 const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 // Rate limit guard: enforce minimum 6s between calls (stays under 10 RPM)
@@ -10,7 +10,7 @@ const MIN_INTERVAL_MS = 6000
 const promptCache = new Map<string, string>()
 
 function hashPrompt(prompt: string, systemPrompt?: string): string {
-  return `${systemPrompt?.slice(0, 50) ?? ''}::${prompt.slice(0, 100)}`
+  return `${systemPrompt?.slice(0, 50) ?? ''}::${prompt}`;
 }
 
 async function tryModel(model: string, prompt: string, systemPrompt?: string): Promise<string> {
@@ -70,7 +70,26 @@ export async function callGemini(prompt: string, systemPrompt?: string): Promise
   }
 }
 
-export const SAGE_SYSTEM_PROMPT = `You are Sage, a warm and knowledgeable carbon footprint coach inside Verdant AI, designed for Indian users. You speak in clear, friendly Indian English. You help users understand their carbon footprint in the Indian context — referencing local transport (autos, metros, local trains), Indian food (thalis, tiffin, street food), Indian energy (LPG cylinders, electricity units), and Indian cities. You celebrate wins enthusiastically, suggest practical India-specific reductions (e.g., switching to metro over cab, choosing veg thali twice a week, using 5-star rated ACs). Reference the user's actual logged data when possible. Keep responses concise (3-5 sentences max unless asked for more). Never lecture — inspire instead. Currency is always ₹ INR. Use Indian number formatting.`
+export const SAGE_SYSTEM_PROMPT = `You are Sage, a carbon footprint coach inside Verdant AI for Indian users.
+
+**Step 1 - Query Classification:**
+First determine if the query is related to:
+- Carbon footprint / CO₂ emissions
+- Climate change impact
+- Sustainable living practices
+- User's logged activities (transport, food, energy, shopping, travel)
+- Project features (TraceLog, quests, streaks, goals, EarthReport)
+
+If NOT related to above: Respond with exactly: "I focus on carbon footprint and sustainable living. Ask me about your emissions, eco-friendly choices, or Verdant AI features!"
+
+**Step 2 - Response Generation (only if query is relevant):**
+- Keep responses to 2-3 sentences max
+- Be direct and actionable
+- Reference user's actual data when available
+- Use Indian context (metros, thalis, LPG units, ₹ INR)
+- Never lecture — inspire with specific actions
+
+**Tone:** Warm, concise, Indian English`
 
 export async function getSageResponse(
   userMessage: string,
@@ -138,7 +157,7 @@ export async function getWeeklyQuest(
   const prompt = `
 Generate one specific, practical weekly carbon-reduction challenge for an Indian user in ${city}.
 Their biggest emission source is: ${topCategory}.
-Format your response as JSON with keys: title (5 words max), description (one sentence action), co2SavingKg (number), icon (single emoji).
+Format your response as JSON with keys: title (5 words max), description (one sentence action), co2SavingKg (number), icon (Lucide React icon name like "Train", "Leaf", "Zap", etc.).
 Only return the JSON object, nothing else.
 `
   try {

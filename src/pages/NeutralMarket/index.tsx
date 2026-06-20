@@ -4,13 +4,14 @@ import { ShieldCheck, X, ArrowRight } from 'lucide-react'
 import { GlassCard } from '../../components/ui/GlassCard'
 import { formatINR, formatNumDecimal } from '../../lib/formatters'
 import { useVerdantStore, getMonthlyTotal } from '../../lib/store'
+import { CategoryIcon } from '../../components/ui/CategoryIcon'
 
 const OFFSET_PROJECTS = [
   {
     id: 'sundarbans',
     name: 'Sundarbans Mangrove Restoration',
     location: 'West Bengal',
-    emoji: '🌿',
+    icon: 'TreePine',
     pricePerTonne: 420,
     verification: 'Gold Standard',
     description: 'Restoring mangrove forests in the Sundarbans delta — one of the world\'s most biodiverse ecosystems and a vital carbon sink.',
@@ -22,7 +23,7 @@ const OFFSET_PROJECTS = [
     id: 'rajasthan-solar',
     name: 'Rajasthan Solar Farm Community Project',
     location: 'Rajasthan',
-    emoji: '☀️',
+    icon: 'Sun',
     pricePerTonne: 380,
     verification: 'VCS (Verified Carbon Standard)',
     description: 'Community-owned solar farms in rural Rajasthan, bringing clean energy to 1,200 households while displacing coal power.',
@@ -34,7 +35,7 @@ const OFFSET_PROJECTS = [
     id: 'western-ghats',
     name: 'Western Ghats Reforestation',
     location: 'Karnataka',
-    emoji: '🌳',
+    icon: 'TreePine',
     pricePerTonne: 490,
     verification: 'Gold Standard',
     description: 'Native species reforestation in the biodiverse Western Ghats — one of only 36 global biodiversity hotspots.',
@@ -46,7 +47,7 @@ const OFFSET_PROJECTS = [
     id: 'himalayan-cookstove',
     name: 'Himalayan Clean Cookstove Initiative',
     location: 'Uttarakhand & Himachal Pradesh',
-    emoji: '🍳',
+    icon: 'CookingPot',
     pricePerTonne: 350,
     verification: 'Gold Standard',
     description: 'Replacing traditional wood-burning chulhas with efficient cookstoves in Himalayan villages — reducing deforestation and indoor air pollution.',
@@ -58,7 +59,7 @@ const OFFSET_PROJECTS = [
     id: 'gujarat-wind',
     name: 'Gujarat Offshore Wind Farm',
     location: 'Gujarat',
-    emoji: '💨',
+    icon: 'Wind',
     pricePerTonne: 410,
     verification: 'VCS (Verified Carbon Standard)',
     description: 'Offshore wind energy project in the Gulf of Kutch, contributing to India\'s 500 GW renewable target.',
@@ -135,14 +136,14 @@ function CheckoutModal({ project, tonnes, onClose }: { project: typeof OFFSET_PR
           </>
         ) : (
           <div className="text-center py-4">
-            <m.p
+            <m.div
               className="text-5xl mb-4"
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.2, 1] }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              🌿
-            </m.p>
+              <CategoryIcon name="Leaf" size={48} className="text-[#2ECC7A]" />
+            </m.div>
             <h3 className="text-xl font-bold text-[#2ECC7A] mb-2">Thank you!</h3>
             <p className="text-sm text-[rgba(245,240,232,0.7)] mb-4">
               Your contribution helps the {project.name} project.
@@ -173,7 +174,7 @@ export function NeutralMarketPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#F5F0E8]">NeutralMarket 🛒</h1>
+        <h1 className="text-2xl font-bold text-[#F5F0E8]">NeutralMarket</h1>
         <p className="text-sm text-[rgba(245,240,232,0.5)]">
           Offset your footprint with verified Indian projects
         </p>
@@ -215,10 +216,10 @@ export function NeutralMarketPage() {
             <GlassCard className="p-5">
               <div className="flex items-start gap-4">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: 'rgba(46,204,122,0.12)' }}
                 >
-                  {project.emoji}
+                  <CategoryIcon name={project.icon} size={24} strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
@@ -231,7 +232,7 @@ export function NeutralMarketPage() {
                     </span>
                   </div>
                   <p className="text-xs text-[rgba(245,240,232,0.5)] mb-2">
-                    📍 {project.location}
+                    <CategoryIcon name="MapPin" size={10} className="inline mr-1" />{project.location}
                   </p>
                   <p className="text-xs text-[rgba(245,240,232,0.65)] mb-3 leading-relaxed">
                     {project.description}

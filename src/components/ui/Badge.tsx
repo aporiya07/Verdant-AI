@@ -1,4 +1,5 @@
 import { getLevelInfo } from '../../lib/store'
+import { LevelIcon } from './CategoryIcon'
 
 interface LevelBadgeProps {
   xp: number
@@ -17,7 +18,7 @@ export function LevelBadge({ xp, size = 'md', showTitle = true }: LevelBadgeProp
     <span
       className={`inline-flex items-center glass-pill font-semibold text-[#A8F5B0] ${sizeClasses[size]}`}
     >
-      <span>{icon}</span>
+      <LevelIcon name={icon} size={size === 'sm' ? 12 : size === 'md' ? 14 : 16} strokeWidth={1.75} />
       {showTitle && <span>{title}</span>}
     </span>
   )

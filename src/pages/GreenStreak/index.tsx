@@ -3,16 +3,17 @@ import { useVerdantStore, getLevelInfo } from '../../lib/store'
 import { GlassCard } from '../../components/ui/GlassCard'
 import { ProgressBar } from '../../components/ui/ProgressBar'
 import { formatNum } from '../../lib/formatters'
+import { CategoryIcon, LevelIcon } from '../../components/ui/CategoryIcon'
 
 const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 2000, 4000]
 
 const BADGES_DATA = [
-  { id: 'metro-warrior', icon: '🚇', label: 'Metro Warrior', desc: 'Logged metro 5 times' },
-  { id: 'veg-week', icon: '🥗', label: 'Zero-Veg Week', desc: 'Chose veg all week' },
-  { id: 'no-ac', icon: '❄️', label: 'No-AC Day', desc: 'Saved AC electricity' },
-  { id: 'cycle-champ', icon: '🚲', label: 'Cycle Champion', desc: 'Cycled 3 days in a week' },
-  { id: 'streak-7', icon: '🔥', label: '7-Day Streak', desc: 'Logged 7 days in a row' },
-  { id: 'first-log', icon: '🌱', label: 'First Step', desc: 'Logged first activity' },
+  { id: 'metro-warrior', icon: 'Train', label: 'Metro Warrior', desc: 'Logged metro 5 times' },
+  { id: 'veg-week', icon: 'Salad', label: 'Zero-Veg Week', desc: 'Chose veg all week' },
+  { id: 'no-ac', icon: 'Snowflake', label: 'No-AC Day', desc: 'Saved AC electricity' },
+  { id: 'cycle-champ', icon: 'Bike', label: 'Cycle Champion', desc: 'Cycled 3 days in a week' },
+  { id: 'streak-7', icon: 'Flame', label: '7-Day Streak', desc: 'Logged 7 days in a row' },
+  { id: 'first-log', icon: 'Sprout', label: 'First Step', desc: 'Logged first activity' },
 ]
 
 export function GreenStreakPage() {
@@ -20,7 +21,8 @@ export function GreenStreakPage() {
   const badges = useVerdantStore(s => s.badges)
   const logs = useVerdantStore(s => s.logs)
 
-  const { level, title, icon, nextThreshold } = getLevelInfo(user.xp)
+  const { title, nextThreshold } = getLevelInfo(user.xp)
+  const level = getLevelInfo(user.xp).level
   const currentThreshold = LEVEL_THRESHOLDS[Math.min(level - 1, LEVEL_THRESHOLDS.length - 1)] ?? 0
   const xpInLevel = user.xp - currentThreshold
   const xpNeeded = nextThreshold - currentThreshold
@@ -43,7 +45,7 @@ export function GreenStreakPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#F5F0E8]">GreenStreak 🌱</h1>
+        <h1 className="text-2xl font-bold text-[#F5F0E8]">GreenStreak</h1>
         <p className="text-sm text-[rgba(245,240,232,0.5)]">Your journey to becoming an EarthGuardian</p>
       </div>
 
@@ -53,14 +55,7 @@ export function GreenStreakPage() {
         animate={{ opacity: 1, y: 0 }}
       >
         <GlassCard strong className="p-6 text-center">
-          <m.p
-            className="text-6xl mb-3"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ filter: 'drop-shadow(0 0 20px rgba(46,204,122,0.4))' }}
-          >
-            {icon}
-          </m.p>
+          <LevelIcon name={title} size={64} className="mb-3" />
           <h2 className="text-2xl font-bold text-[#F5F0E8] mb-1">{title}</h2>
           <p className="text-[rgba(245,240,232,0.5)] text-sm mb-4">Level {level}</p>
 
@@ -95,11 +90,11 @@ export function GreenStreakPage() {
           >
             {user.streak}
           </m.p>
-          <p className="text-sm text-[rgba(245,240,232,0.6)] mt-1">🍃 Day streak</p>
+          <p className="text-sm text-[rgba(245,240,232,0.6)] mt-1"><CategoryIcon name="Leaf" size={12} className="inline mr-1" />Day streak</p>
         </GlassCard>
         <GlassCard className="p-5 text-center">
           <p className="text-4xl font-bold text-[#A8F5B0]">{formatNum(user.xp)}</p>
-          <p className="text-sm text-[rgba(245,240,232,0.6)] mt-1">⚡ Total XP</p>
+          <p className="text-sm text-[rgba(245,240,232,0.6)] mt-1"><CategoryIcon name="Zap" size={12} className="inline mr-1" />Total XP</p>
         </GlassCard>
       </m.div>
 
@@ -148,13 +143,13 @@ export function GreenStreakPage() {
           </p>
           <div className="space-y-3">
             {[
-              { level: 1, title: 'Seedling', icon: '🌱', threshold: 0 },
-              { level: 2, title: 'Sprout', icon: '🌿', threshold: 100 },
-              { level: 3, title: 'Sapling', icon: '🌳', threshold: 300 },
-              { level: 4, title: 'Bamboo', icon: '🎋', threshold: 600 },
-              { level: 5, title: 'Oak', icon: '🌲', threshold: 1000 },
-              { level: 6, title: 'Banyan', icon: '🌴', threshold: 2000 },
-              { level: 7, title: 'EarthGuardian', icon: '🌍', threshold: 4000 },
+              { level: 1, title: 'Seedling', icon: 'Sprout', threshold: 0 },
+              { level: 2, title: 'Sprout', icon: 'Leaf', threshold: 100 },
+              { level: 3, title: 'Sapling', icon: 'TreePine', threshold: 300 },
+              { level: 4, title: 'Bamboo', icon: 'TreePine', threshold: 600 },
+              { level: 5, title: 'Oak', icon: 'TreePine', threshold: 1000 },
+              { level: 6, title: 'Banyan', icon: 'Palmtree', threshold: 2000 },
+              { level: 7, title: 'EarthGuardian', icon: 'Globe', threshold: 4000 },
             ].map(l => {
               const unlocked = user.xp >= l.threshold
               const isCurrent = level === l.level
@@ -164,7 +159,7 @@ export function GreenStreakPage() {
                   className="flex items-center gap-3"
                   style={{ opacity: unlocked ? 1 : 0.4 }}
                 >
-                  <span className="text-xl w-8 text-center">{l.icon}</span>
+                  <LevelIcon name={l.icon} size={20} className="w-8 text-center" />
                   <div className="flex-1">
                     <p className="text-sm font-medium" style={{ color: isCurrent ? '#2ECC7A' : '#F5F0E8' }}>
                       {l.title} {isCurrent && '← You are here'}
@@ -202,7 +197,7 @@ export function GreenStreakPage() {
                     opacity: earned ? 1 : 0.4,
                   }}
                 >
-                  <span className="text-2xl">{badge.icon}</span>
+                  <CategoryIcon name={badge.icon} size={24} strokeWidth={1.75} />
                   <p className="text-xs font-semibold text-[#F5F0E8] leading-tight">{badge.label}</p>
                   <p className="text-xs text-[rgba(245,240,232,0.4)] leading-tight">{badge.desc}</p>
                 </div>

@@ -100,7 +100,7 @@ const DEFAULT_USER: UserProfile = {
   id: crypto.randomUUID(),
   name: '',
   city: 'Bengaluru',
-  avatar: '🌿',
+  avatar: 'Leaf',
   level: 1,
   xp: 0,
   streak: 0,
@@ -122,7 +122,7 @@ const DEFAULT_QUESTS: Quest[] = [
     progress: 0,
     completed: false,
     category: 'transport',
-    icon: '🚇',
+    icon: 'Train',
   },
   {
     id: 'q2',
@@ -134,7 +134,7 @@ const DEFAULT_QUESTS: Quest[] = [
     progress: 0,
     completed: false,
     category: 'food',
-    icon: '🍳',
+    icon: 'CookingPot',
   },
   {
     id: 'q3',
@@ -146,7 +146,7 @@ const DEFAULT_QUESTS: Quest[] = [
     progress: 0,
     completed: false,
     category: 'energy',
-    icon: '❄️',
+    icon: 'Snowflake',
   },
   {
     id: 'q4',
@@ -158,7 +158,7 @@ const DEFAULT_QUESTS: Quest[] = [
     progress: 0,
     completed: false,
     category: 'food',
-    icon: '🥗',
+    icon: 'Salad',
   },
   {
     id: 'q5',
@@ -170,7 +170,7 @@ const DEFAULT_QUESTS: Quest[] = [
     progress: 0,
     completed: false,
     category: 'transport',
-    icon: '🚗',
+    icon: 'Car',
   },
 ]
 
@@ -186,13 +186,13 @@ const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 2000, 4000]
 
 export function getLevelInfo(xp: number): { level: number; title: string; icon: string; nextThreshold: number } {
   const titles = [
-    { title: 'Seedling', icon: '🌱' },
-    { title: 'Sprout', icon: '🌿' },
-    { title: 'Sapling', icon: '🌳' },
-    { title: 'Bamboo', icon: '🎋' },
-    { title: 'Oak', icon: '🌲' },
-    { title: 'Banyan', icon: '🌴' },
-    { title: 'EarthGuardian', icon: '🌍' },
+    { title: 'Seedling', icon: 'Sprout' },
+    { title: 'Sprout', icon: 'Leaf' },
+    { title: 'Sapling', icon: 'TreePine' },
+    { title: 'Bamboo', icon: 'TreePine' },
+    { title: 'Oak', icon: 'TreePine' },
+    { title: 'Banyan', icon: 'Palmtree' },
+    { title: 'EarthGuardian', icon: 'Globe' },
   ]
   let level = 0
   for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {

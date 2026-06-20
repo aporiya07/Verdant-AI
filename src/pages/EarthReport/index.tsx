@@ -1,5 +1,5 @@
 import { m } from 'motion/react'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { Download, RefreshCw, Leaf } from 'lucide-react'
 import { useVerdantStore, getMonthlyLogs, getMonthlyTotal, getCategoryTotals } from '../../lib/store'
 import { INDIA_BENCHMARKS, CATEGORY_LABELS } from '../../lib/carbon'
@@ -9,6 +9,7 @@ import { GlassCard } from '../../components/ui/GlassCard'
 import { CategoryPieChart } from '../../components/charts/CategoryPieChart'
 import { EmissionsAreaChart } from '../../components/charts/EmissionsAreaChart'
 import { SkeletonCard } from '../../components/ui/SkeletonCard'
+import { CategoryIcon } from '../../components/ui/CategoryIcon'
 
 export function EarthReportPage() {
   const user = useVerdantStore(s => s.user)
@@ -25,30 +26,25 @@ export function EarthReportPage() {
   const monthLogs = getMonthlyLogs(logs)
   const monthlyKg = getMonthlyTotal(logs)
   const categoryTotals = getCategoryTotals(monthLogs)
-  // topCategory used for future enhancements
-  Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]
 
   const savedReport = monthlyReports.find(r => r.monthKey === monthKey)
 
-  useEffect(() => {
-    if (savedReport?.geminiSummary) {
-      setSummary(savedReport.geminiSummary)
-    } else if (monthlyKg > 0) {
-      generateSummary()
-    }
-  }, [monthKey])
-
-  const generateSummary = async () => {
+  const generateSummary = useCallback(async () => {
     setSummaryLoading(true)
     try {
       const prompt = `
-You are Sage, a carbon footprint coach for Indian users. Generate a warm, encouraging monthly report summary (3-4 sentences).
-User: ${user.name}, ${user.city}
-This month's CO₂: ${monthlyKg.toFixed(1)} kg (goal: ${user.monthlyGoalKg} kg, India avg: ${INDIA_BENCHMARKS.avgMonthlyKg} kg)
-Breakdown: ${Object.entries(categoryTotals).map(([k, v]) => `${k}: ${v.toFixed(1)} kg`).join(', ')}
-Activities logged: ${monthLogs.length}
+Generate a structured monthly recap in exactly 4 bullet points (no intro/outro).
 
-Include: key wins, one specific suggestion for next month, and a motivating close. Use Indian English.
+**Format:**
+📊 **Total:** X kg CO₂ (Y% vs India avg)
+🏆 **Win:** [one specific achievement]
+📉 **Top Source:** [category] at X kg — [one actionable tip]
+🎯 **Next Month:** [one specific goal]
+
+User: ${user.name}, ${user.city}
+CO₂: ${monthlyKg.toFixed(1)} kg (India avg: ${INDIA_BENCHMARKS.avgMonthlyKg} kg)
+Categories: ${Object.entries(categoryTotals).map(([k, v]) => `${k}: ${v.toFixed(1)}`).join(', ')}
+Activities: ${monthLogs.length}
 `
       const result = await callGemini(prompt)
       setSummary(result)
@@ -61,11 +57,24 @@ Include: key wins, one specific suggestion for next month, and a motivating clos
         generatedAt: new Date().toISOString(),
       })
     } catch {
-      setSummary(`Great effort this month, ${user.name}! You logged ${monthLogs.length} activities and tracked ${monthlyKg.toFixed(1)} kg CO₂. ${monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg ? 'You\'re below India\'s average — brilliant!' : 'Keep pushing — every kg counts!'} Keep up the momentum next month!`)
+      const win = monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg ? 'Below India avg' : `${monthLogs.length} activities logged`
+      const topCat = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]
+      setSummary(`📊 **Total:** ${monthlyKg.toFixed(1)} kg CO₂
+🏆 **Win:** ${win}
+📉 **Top Source:** ${topCat ? `${topCat[0]} (${topCat[1].toFixed(1)} kg)` : 'Start logging'}
+🎯 **Next Month:** Track one more category`)
     } finally {
       setSummaryLoading(false)
     }
-  }
+  }, [user.name, user.city, monthlyKg, user.monthlyGoalKg, categoryTotals, monthLogs.length, saveReport, monthKey])
+
+  useEffect(() => {
+    if (savedReport?.geminiSummary) {
+      setSummary(savedReport.geminiSummary)
+    } else if (monthlyKg > 0) {
+      generateSummary()
+    }
+  }, [monthKey, savedReport, monthlyKg, generateSummary])
 
   const handleExport = async () => {
     if (!reportRef.current) return
@@ -96,7 +105,7 @@ Include: key wins, one specific suggestion for next month, and a motivating clos
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#F5F0E8]">EarthReport 📄</h1>
+          <h1 className="text-2xl font-bold text-[#F5F0E8]">EarthReport</h1>
           <p className="text-sm text-[rgba(245,240,232,0.5)]">
             {formatMonthYear(new Date().toISOString())} · Monthly summary
           </p>
@@ -157,7 +166,7 @@ Include: key wins, one specific suggestion for next month, and a motivating clos
         <GlassCard className="p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs text-[rgba(245,240,232,0.5)] uppercase tracking-wider font-medium">
-              🤖 Sage's Monthly Recap
+              <CategoryIcon name="Bot" size={10} className="inline mr-1" />Sage's Monthly Recap
             </p>
             <button
               onClick={generateSummary}
@@ -171,7 +180,17 @@ Include: key wins, one specific suggestion for next month, and a motivating clos
           {summaryLoading ? (
             <SkeletonCard lines={4} className="bg-transparent p-0 border-0" />
           ) : summary ? (
-            <p className="text-sm text-[rgba(245,240,232,0.85)] leading-relaxed">{summary}</p>
+            <div className="text-sm text-[rgba(245,240,232,0.85)] leading-relaxed space-y-2">
+              {summary.split('\n').filter(line => line.trim()).map((line, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <span className="text-xs mt-0.5">{line.split('**')[0]}</span>
+                  <span className="font-semibold text-[#A8F5B0]">
+                    {line.split('**')[1]?.split('**')[0]}
+                  </span>
+                  <span className="text-xs">{line.split('**')[2]}</span>
+                </div>
+              ))}
+            </div>
           ) : (
             <p className="text-sm text-[rgba(245,240,232,0.4)]">
               Start logging activities to get your AI-powered monthly summary!

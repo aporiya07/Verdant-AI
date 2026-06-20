@@ -2,25 +2,27 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { m, AnimatePresence } from 'motion/react'
 import { useState } from 'react'
 import {
-  LayoutDashboard, Leaf, Target, Flame, Users, ShoppingBag, FileText, Menu, X, Sprout,
+  LayoutDashboard, Leaf, Target, Flame, Users, ShoppingBag, FileText, Menu, X, Sprout, ChevronRight,
 } from 'lucide-react'
 import { useVerdantStore } from '../../lib/store'
 import { LevelBadge } from '../ui/Badge'
+import { ProfileEditModal } from './ProfileEditModal'
 
 const NAV_ITEMS = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'EarthPulse', emoji: '🌍' },
-  { to: '/tracelog', icon: Leaf, label: 'TraceLog', emoji: '📊' },
-  { to: '/quests', icon: Target, label: 'QuestBoard', emoji: '⚡' },
-  { to: '/streak', icon: Flame, label: 'GreenStreak', emoji: '🌱' },
-  { to: '/grove', icon: Users, label: 'The Grove', emoji: '🌳' },
-  { to: '/market', icon: ShoppingBag, label: 'NeutralMarket', emoji: '🛒' },
-  { to: '/report', icon: FileText, label: 'EarthReport', emoji: '📄' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'EarthPulse' },
+  { to: '/tracelog', icon: Leaf, label: 'TraceLog' },
+  { to: '/quests', icon: Target, label: 'QuestBoard' },
+  { to: '/streak', icon: Flame, label: 'GreenStreak' },
+  { to: '/grove', icon: Users, label: 'The Grove' },
+  { to: '/market', icon: ShoppingBag, label: 'NeutralMarket' },
+  { to: '/report', icon: FileText, label: 'EarthReport' },
 ]
 
 export function Sidebar() {
   const location = useLocation()
   const user = useVerdantStore(s => s.user)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [profileModalOpen, setProfileModalOpen] = useState(false)
 
   return (
     <>
@@ -77,30 +79,6 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* User card */}
-        <div className="px-4 py-3 border-b border-[rgba(46,204,122,0.08)]">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-              style={{ background: 'rgba(46,204,122,0.18)', border: '1px solid rgba(46,204,122,0.25)', color: '#2ECC7A' }}
-            >
-              {user.name ? user.name.charAt(0).toUpperCase() : <Leaf size={16} strokeWidth={1.75} />}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#F5F0E8] truncate">
-                {user.name || 'Friend'}
-              </p>
-              <LevelBadge xp={user.xp} size="sm" />
-            </div>
-          </div>
-          {user.streak > 0 && (
-            <div className="mt-2 flex items-center gap-1.5 text-xs text-[#FFD166]">
-              <span>🍃</span>
-              <span>{user.streak} day streak</span>
-            </div>
-          )}
-        </div>
-
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <ul className="space-y-1">
@@ -124,7 +102,7 @@ export function Sidebar() {
                         layoutId="nav-indicator"
                       />
                     )}
-                    <span className="text-base">{item.emoji}</span>
+                    <item.icon size={16} strokeWidth={1.75} />
                     <span>{item.label}</span>
                   </NavLink>
                 </li>
@@ -133,6 +111,34 @@ export function Sidebar() {
           </ul>
         </nav>
 
+        {/* User card - bottom pinned */}
+        <div className="px-4 py-3 border-t border-[rgba(46,204,122,0.08)]">
+          <button
+            onClick={() => setProfileModalOpen(true)}
+            className="w-full flex items-center gap-3 p-2 rounded-xl transition-all hover:bg-[rgba(46,204,122,0.08)] group"
+          >
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+              style={{ background: 'rgba(46,204,122,0.18)', border: '1px solid rgba(46,204,122,0.25)', color: '#2ECC7A' }}
+            >
+              {user.name ? user.name.charAt(0).toUpperCase() : <Leaf size={16} strokeWidth={1.75} />}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-semibold text-[#F5F0E8] truncate">
+                {user.name || 'Friend'}
+              </p>
+              <LevelBadge xp={user.xp} size="sm" />
+            </div>
+            <ChevronRight size={16} className="text-[rgba(245,240,232,0.3)] group-hover:text-[#A8F5B0]" />
+          </button>
+          {user.streak > 0 && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-[#FFD166] justify-center">
+              <Leaf size={12} strokeWidth={1.75} />
+              <span>{user.streak} day streak</span>
+            </div>
+          )}
+        </div>
+
         {/* Footer */}
         <div className="p-4 border-t border-[rgba(46,204,122,0.08)]">
           <p className="text-xs text-[rgba(168,245,176,0.4)] text-center">
@@ -140,6 +146,10 @@ export function Sidebar() {
           </p>
         </div>
       </m.aside>
+
+      <AnimatePresence>
+        {profileModalOpen && <ProfileEditModal onClose={() => setProfileModalOpen(false)} />}
+      </AnimatePresence>
     </>
   )
 }

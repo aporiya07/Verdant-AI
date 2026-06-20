@@ -6,6 +6,7 @@ import { CATEGORY_COLORS } from '../../lib/carbon'
 import { formatNumDecimal } from '../../lib/formatters'
 import { GlassCard } from '../../components/ui/GlassCard'
 import { ProgressBar } from '../../components/ui/ProgressBar'
+import { CategoryIcon } from '../../components/ui/CategoryIcon'
 
 export function QuestBoardPage() {
   const quests = useVerdantStore(s => s.quests)
@@ -36,7 +37,7 @@ export function QuestBoardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#F5F0E8]">QuestBoard ⚡</h1>
+        <h1 className="text-2xl font-bold text-[#F5F0E8]">QuestBoard</h1>
         <p className="text-sm text-[rgba(245,240,232,0.5)]">
           Weekly challenges to slash your footprint
         </p>
@@ -86,7 +87,7 @@ export function QuestBoardPage() {
                       animate={{ scale: [0, 1.2, 1] }}
                       transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                     >
-                      🎉
+                      <CategoryIcon name="Award" size={48} className="text-[#FFD166]" />
                     </m.p>
                   </m.div>
                 )}
@@ -94,10 +95,10 @@ export function QuestBoardPage() {
 
               <div className="flex items-start gap-4">
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: `${CATEGORY_COLORS[quest.category]}20` }}
                 >
-                  {quest.icon}
+                  <CategoryIcon name={quest.icon} size={20} strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
@@ -168,7 +169,7 @@ export function QuestBoardPage() {
                 layout
                 className="glass-card p-4 flex items-center gap-3 opacity-60"
               >
-                <span className="text-xl">{quest.icon}</span>
+                <CategoryIcon name={quest.icon} size={16} strokeWidth={1.75} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[#F5F0E8] line-through">{quest.title}</p>
                   <p className="text-xs text-[#2ECC7A]">+{quest.xpReward} XP · saved {quest.co2SavingKg} kg CO₂</p>
