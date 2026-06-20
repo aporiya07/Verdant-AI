@@ -58,6 +58,30 @@ export function OnboardingPage() {
       diet: (diet as DietType) || 'vegetarian',
       monthlyGoalKg: goalKg,
     })
+
+    const { addLog } = useVerdantStore.getState()
+    const today = new Date().toISOString().split('T')[0]
+
+    if (electricity > 0) {
+      addLog({
+        date: today,
+        category: 'energy',
+        activity: `Monthly Electricity (${electricity} kWh)`,
+        co2Kg: electricity * 0.712,
+        unit: 'kWh',
+        quantity: electricity
+      })
+    }
+    if (lpg > 0) {
+      addLog({
+        date: today,
+        category: 'energy',
+        activity: `Monthly LPG (${lpg} cylinder)`,
+        co2Kg: lpg * 29.5,
+        unit: 'cylinder',
+        quantity: lpg
+      })
+    }
   }
 
   const variants: Variants | undefined = prefersReduced
