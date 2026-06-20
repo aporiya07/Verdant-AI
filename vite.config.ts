@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -7,6 +7,17 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/lib/**/*.ts', 'src/components/**/*.tsx'],
+      exclude: ['src/lib/gemini.ts', 'node_modules'],
+    },
+  },
   build: {
     rollupOptions: {
       output: {
@@ -26,3 +37,4 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
   },
 })
+
