@@ -1,9 +1,9 @@
 import { m } from 'motion/react'
 import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Plus, Car, UtensilsCrossed, Zap, Plane, ShoppingBag, X, ChevronRight } from 'lucide-react'
 import { useVerdantStore, getMonthlyTotal, getCategoryTotals } from '../../lib/store'
-import { INDIA_BENCHMARKS, ACTIVITY_TEMPLATES } from '../../lib/carbon'
+import { INDIA_BENCHMARKS, ACTIVITY_TEMPLATES, calcMonthlyOffsetCostINR } from '../../lib/carbon'
 import { getClarityInsights } from '../../lib/gemini'
 import { ImpactOrb } from '../../components/impactorb/ImpactOrb'
 import { EarthTwin } from '../../components/earthtwin/EarthTwin'
@@ -125,60 +125,68 @@ export function DashboardPage() {
   const clarityCache = useVerdantStore(s => s.clarityFeedCache)
   const setClarityFeedCache = useVerdantStore(s => s.setClarityFeedCache)
 
-  const [insights, setInsights] = useState<string[]>([])
+  const [fetchedInsights, setFetchedInsights] = useState<string[]>([])
   const [insightsLoading, setInsightsLoading] = useState(false)
   const [quickAddCategory, setQuickAddCategory] = useState<string | null>(null)
 
   const monthlyKg = getMonthlyTotal(logs)
-  const categoryTotals = getCategoryTotals(logs)
-  const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'transport'
+  const categoryTotals = useMemo(() => getCategoryTotals(logs), [logs])
+  const topCategory = useMemo(
+    () => Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'transport',
+    [categoryTotals]
+  )
 
-  // Load Clarity insights
+  // Prefer cached insights from the store; fall back to locally fetched ones
+  const insights = clarityCache?.logCount === logs.length
+    ? clarityCache.insights
+    : fetchedInsights
+
+  // Load AI-powered Clarity insights, caching by log count to avoid redundant calls
   useEffect(() => {
-    const shouldRefresh = !clarityCache || clarityCache.logCount !== logs.length
-    if (shouldRefresh && !insightsLoading) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    const isCacheStale = !clarityCache || clarityCache.logCount !== logs.length
+    if (!isCacheStale) return
+
+    const fetchInsights = async () => {
       setInsightsLoading(true)
-      getClarityInsights({
-        name: user.name,
-        city: user.city,
-        monthlyKg,
-        goalKg: user.monthlyGoalKg,
-        byCategory: categoryTotals,
-        avgMonthlyKg: INDIA_BENCHMARKS.avgMonthlyKg,
-      })
-        .then(result => {
-          setInsights(result)
-          setClarityFeedCache(result, logs.length)
+      try {
+        const result = await getClarityInsights({
+          name: user.name,
+          city: user.city,
+          monthlyKg,
+          goalKg: user.monthlyGoalKg,
+          byCategory: categoryTotals,
+          avgMonthlyKg: INDIA_BENCHMARKS.avgMonthlyKg,
         })
-        .catch(() => {
-          setInsights([
-            '🌿 Keep logging your activities for personalized insights!',
-            '🚇 Try commuting by metro or bus to reduce transport emissions.',
-            '🍛 Choosing a veg thali over non-veg saves 1–3 kg CO₂ per meal.',
-          ])
-        })
-        .finally(() => setInsightsLoading(false))
-    } else if (clarityCache) {
-      setInsights(clarityCache.insights)
+        setFetchedInsights(result)
+        setClarityFeedCache(result, logs.length)
+      } catch {
+        setFetchedInsights([
+          '🌿 Keep logging your activities for personalized insights!',
+          '🚇 Try commuting by metro or bus to reduce transport emissions.',
+          '🍛 Choosing a veg thali over non-veg saves 1–3 kg CO₂ per meal.',
+        ])
+      } finally {
+        setInsightsLoading(false)
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logs.length])
 
-  const offsetCostINR = monthlyKg * 0.45 * 420  // ~₹420/tonne, 0.45 for rough fraction
+    fetchInsights()
+  }, [logs.length, clarityCache, user.name, user.city, monthlyKg, user.monthlyGoalKg, categoryTotals, setClarityFeedCache])
 
-  const greeting = () => {
+  const offsetCostINR = useMemo(() => calcMonthlyOffsetCostINR(monthlyKg), [monthlyKg])
+
+  const greeting = useMemo(() => {
     const h = new Date().getHours()
     if (h < 12) return 'Good morning'
     if (h < 17) return 'Good afternoon'
     return 'Good evening'
-  }
+  }, [])
 
   return (
     <div className="space-y-6">
       {/* Hero greeting */}
       <m.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <p className="text-[rgba(168,245,176,0.7)] text-sm mb-1">{greeting()}</p>
+        <p className="text-[rgba(168,245,176,0.7)] text-sm mb-1">{greeting}</p>
         <h1 className="text-2xl font-bold text-[#F5F0E8]">
           Namaste, {user.name}
         </h1>

@@ -56,7 +56,7 @@ export interface Report {
   id: string
   monthKey: string           // YYYY-MM
   totalCO2Kg: number
-  byCategory: Record<ActivityCategory, number>
+  byCategory: Record<string, number>
   geminiSummary: string
   generatedAt: string
 }

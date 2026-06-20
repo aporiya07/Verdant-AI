@@ -141,15 +141,31 @@ export function calcTransportCO2(mode: keyof typeof CO2_FACTORS_INDIA.transport,
   return (CO2_FACTORS_INDIA.transport[mode] ?? 0) * km
 }
 
-// Calculate electricity CO₂
+/** Calculate CO₂ for a given kWh electricity consumption */
 export function calcElectricityCO2(kwh: number): number {
   return CO2_FACTORS_INDIA.energy.electricity_kwh * kwh
 }
 
-// Get ImpactOrb color zone
+/** Voluntary carbon market price per tonne (INR) for the Indian market (~2024) */
+export const CARBON_PRICE_INR_PER_TONNE = 420
+
+/**
+ * Estimated monthly carbon offset cost in INR.
+ * Uses 45% of monthly kg as the "offset-eligible" fraction
+ * (scope 1+2 activities that can realistically be offset).
+ */
+export function calcMonthlyOffsetCostINR(monthlyKg: number): number {
+  const OFFSET_ELIGIBLE_FRACTION = 0.45
+  return (monthlyKg / 1000) * OFFSET_ELIGIBLE_FRACTION * CARBON_PRICE_INR_PER_TONNE * 1000
+}
+
+/** Threshold (kg CO₂) above which the orb zone is considered "high" */
+const HIGH_EMISSION_THRESHOLD_KG = 300
+
+/** Get ImpactOrb color zone */
 export function getOrbZone(monthlyKg: number): 'green' | 'amber' | 'red' {
   if (monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg) return 'green'
-  if (monthlyKg < 300) return 'amber'
+  if (monthlyKg < HIGH_EMISSION_THRESHOLD_KG) return 'amber'
   return 'red'
 }
 
@@ -159,3 +175,4 @@ export function getOrbMessage(monthlyKg: number): string {
   if (zone === 'amber') return 'Near Average — Room to improve'
   return 'Above Average — Let\'s fix this'
 }
+

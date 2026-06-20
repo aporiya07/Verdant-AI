@@ -1,5 +1,5 @@
 import { m } from 'motion/react'
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { Download, RefreshCw, Leaf } from 'lucide-react'
 import { useVerdantStore, getMonthlyLogs, getMonthlyTotal, getCategoryTotals } from '../../lib/store'
 import { INDIA_BENCHMARKS, CATEGORY_LABELS } from '../../lib/carbon'
@@ -18,21 +18,26 @@ export function EarthReportPage() {
   const saveReport = useVerdantStore(s => s.saveReport)
 
   const reportRef = useRef<HTMLDivElement>(null)
-  const [summary, setSummary] = useState<string>('')
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [exporting, setExporting] = useState(false)
 
   const monthKey = currentMonthKey()
-  const monthLogs = getMonthlyLogs(logs)
-  const monthlyKg = getMonthlyTotal(logs)
-  const categoryTotals = getCategoryTotals(monthLogs)
+  const monthLogs = useMemo(() => getMonthlyLogs(logs), [logs])
+  const monthlyKg = useMemo(() => getMonthlyTotal(logs), [logs])
+  const categoryTotals = useMemo(() => getCategoryTotals(monthLogs), [monthLogs])
 
   const savedReport = monthlyReports.find(r => r.monthKey === monthKey)
 
-  const generateSummary = useCallback(async () => {
-    setSummaryLoading(true)
-    try {
-      const prompt = `
+  // Prefer a cached AI summary; falls back to the async-generated one
+  const [generatedSummary, setGeneratedSummary] = useState<string>('')
+  const summary = savedReport?.geminiSummary ?? generatedSummary
+
+  /**
+   * Builds the Gemini prompt and fetches an AI monthly summary.
+   * Returns the generated text (or a fallback string on error).
+   */
+  const fetchSummary = useCallback(async (): Promise<string> => {
+    const prompt = `
 Generate a structured monthly recap in exactly 4 bullet points (no intro/outro).
 
 **Format:**
@@ -46,37 +51,55 @@ CO₂: ${monthlyKg.toFixed(1)} kg (India avg: ${INDIA_BENCHMARKS.avgMonthlyKg} k
 Categories: ${Object.entries(categoryTotals).map(([k, v]) => `${k}: ${v.toFixed(1)}`).join(', ')}
 Activities: ${monthLogs.length}
 `
-      const result = await callGemini(prompt)
-      setSummary(result)
+    try {
+      return await callGemini(prompt)
+    } catch {
+      const win = monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg ? 'Below India avg' : `${monthLogs.length} activities logged`
+      const topCat = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]
+      return `📊 **Total:** ${monthlyKg.toFixed(1)} kg CO₂
+🏆 **Win:** ${win}
+📉 **Top Source:** ${topCat ? `${topCat[0]} (${topCat[1].toFixed(1)} kg)` : 'Start logging'}
+🎯 **Next Month:** Track one more category`
+    }
+  }, [user.name, user.city, monthlyKg, categoryTotals, monthLogs.length])
+
+  // Auto-generate summary on first load if no cached version exists
+  useEffect(() => {
+    if (savedReport?.geminiSummary || monthlyKg === 0) return
+
+    const runFetch = async () => {
+      setSummaryLoading(true)
+      const result = await fetchSummary()
+      setGeneratedSummary(result)
       saveReport({
         id: crypto.randomUUID(),
         monthKey,
         totalCO2Kg: monthlyKg,
-        byCategory: categoryTotals as Record<string, number> as never,
+        byCategory: categoryTotals,
         geminiSummary: result,
         generatedAt: new Date().toISOString(),
       })
-    } catch {
-      const win = monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg ? 'Below India avg' : `${monthLogs.length} activities logged`
-      const topCat = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]
-      setSummary(`📊 **Total:** ${monthlyKg.toFixed(1)} kg CO₂
-🏆 **Win:** ${win}
-📉 **Top Source:** ${topCat ? `${topCat[0]} (${topCat[1].toFixed(1)} kg)` : 'Start logging'}
-🎯 **Next Month:** Track one more category`)
-    } finally {
       setSummaryLoading(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.name, user.city, monthlyKg, user.monthlyGoalKg, categoryTotals, monthLogs.length, saveReport, monthKey])
 
-  useEffect(() => {
-    if (savedReport?.geminiSummary) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSummary(savedReport.geminiSummary)
-    } else if (monthlyKg > 0) {
-      generateSummary()
-    }
-  }, [monthKey, savedReport, monthlyKg, generateSummary])
+    runFetch()
+  }, [monthKey, savedReport, monthlyKg, fetchSummary, categoryTotals, saveReport])
+
+  /** Manual refresh triggered by the Refresh button */
+  const handleRefreshSummary = useCallback(async () => {
+    setSummaryLoading(true)
+    const result = await fetchSummary()
+    setGeneratedSummary(result)
+    saveReport({
+      id: crypto.randomUUID(),
+      monthKey,
+      totalCO2Kg: monthlyKg,
+      byCategory: categoryTotals,
+      geminiSummary: result,
+      generatedAt: new Date().toISOString(),
+    })
+    setSummaryLoading(false)
+  }, [fetchSummary, monthKey, monthlyKg, categoryTotals, saveReport])
 
   const handleExport = async () => {
     if (!reportRef.current) return
@@ -171,7 +194,7 @@ Activities: ${monthLogs.length}
               <CategoryIcon name="Bot" size={10} className="inline mr-1" />Sage's Monthly Recap
             </p>
             <button
-              onClick={generateSummary}
+              onClick={handleRefreshSummary}
               disabled={summaryLoading}
               className="text-xs flex items-center gap-1 text-[rgba(46,204,122,0.6)] hover:text-[#2ECC7A] transition-colors"
             >

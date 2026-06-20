@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import createGlobe from 'cobe'
 import type { Globe } from 'cobe'
 import { useVerdantStore, getMonthlyTotal } from '../../lib/store'
@@ -21,20 +21,21 @@ export function EarthTwin({ size = 280, className = '', static: isStatic = false
 
   const healthScore = Math.max(0, 1 - monthlyKg / 400)
 
-  const baseColor: [number, number, number] = [
+  const baseColor = useMemo<[number, number, number]>(() => [
     0.1 + (1 - healthScore) * 0.8,
     0.75 * healthScore + 0.1,
     0.1 + healthScore * 0.2,
-  ]
-  const glowColor: [number, number, number] = [
+  ], [healthScore])
+
+  const glowColor = useMemo<[number, number, number]>(() => [
     0.05 + (1 - healthScore) * 0.5,
     0.5 * healthScore + 0.05,
     0.05,
-  ]
+  ], [healthScore])
 
-  const markers: { location: [number, number]; size: number }[] = [
-    { location: [20.5937, 78.9629], size: 0.06 },
-  ]
+  const markers = useMemo(() => [
+    { location: [20.5937, 78.9629] as [number, number], size: 0.06 },
+  ], [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -74,8 +75,7 @@ export function EarthTwin({ size = 280, className = '', static: isStatic = false
       cancelAnimationFrame(rafRef.current)
       globeRef.current?.destroy()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [size, healthScore, isStatic])
+  }, [size, healthScore, isStatic, baseColor, glowColor, markers])
 
   const zone = monthlyKg < INDIA_BENCHMARKS.avgMonthlyKg
     ? 'Thriving'
