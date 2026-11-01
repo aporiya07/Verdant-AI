@@ -58,3 +58,8 @@ Verdant-AI is built with inclusivity in mind:
 * Semantic HTML forms and clear focus states.
 * High color contrast ratios (with a tailored dark theme).
 * Text alternatives for all chart data and visualizations.
+
+
+## What I'd improve with more time
+
+This was built for a hackathon, so some parts were kept deliberately simple. With more time I would raise test coverage and publish coverage reports from CI instead of committing them, back the emission estimates with cited and regularly updated emission-factor sources, add monitoring and rate limiting around the Gemini calls, and add end-to-end tests for the full onboarding-to-dashboard flow.
